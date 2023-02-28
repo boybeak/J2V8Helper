@@ -1,10 +1,7 @@
 package com.github.boybeak.j2v8helper
 
 import android.util.Log
-import com.eclipsesource.v8.V8
-import com.eclipsesource.v8.V8Array
-import com.eclipsesource.v8.V8Object
-import com.eclipsesource.v8.V8Value
+import com.eclipsesource.v8.*
 import com.github.boybeak.j2v8helper.annotation.V8Field
 import com.github.boybeak.j2v8helper.annotation.V8Method
 import com.github.boybeak.j2v8helper.ext.bindWith
@@ -21,6 +18,14 @@ object J2V8Helper {
         function $FUNC_NAME(obj) {
             return new Proxy(obj, {
                 set: function (target, key, value) {
+                    var oldValue = target[key];
+                    if (oldValue == undefined) {
+                        oldValue = null;
+                    }
+                    var newValue = value;
+                    if (newValue == undefined) {
+                        newValue = null;
+                    }
                     target[key] = value;
                     // call the native method update, notify value changed
                     const methodName = target["$KEY_SETTERS"][key];
@@ -31,11 +36,11 @@ object J2V8Helper {
                         const keys = target["$KEY_UPDATABLE_KEYS"];
                         if (updateStrategy == "CARE") {
                             if (keys.includes(key)) {
-                                target.onV8Update(key, value);
+                                target.onV8Update(target, key, newValue, oldValue);
                             }
                         } else {
                             if (!keys.includes(key)) {
-                                target.onV8Update(key, value);
+                                target.onV8Update(target, key, newValue, oldValue);
                             }
                         }
                     } else {
@@ -102,7 +107,8 @@ object J2V8Helper {
                     push(it)
                 }
             })
-            v8obj.registerJavaMethod(obj, "onV8Update", "onV8Update", arrayOf(String::class.java, Any::class.java))
+            v8obj.registerJavaMethod(obj, "onV8Update", "onV8Update",
+                arrayOf(V8Object::class.java, String::class.java, Any::class.java, Any::class.java))
         }
         registerV8Methods(v8obj, obj)
         return v8.executeObjectFunction(FUNC_NAME, V8Array(v8).push(v8obj))

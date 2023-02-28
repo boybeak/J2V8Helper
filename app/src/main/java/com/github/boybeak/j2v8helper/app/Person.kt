@@ -1,6 +1,7 @@
 package com.github.boybeak.j2v8helper.app
 
 import android.util.Log
+import com.eclipsesource.v8.V8Object
 import com.github.boybeak.j2v8helper.V8Updatable
 import com.github.boybeak.j2v8helper.annotation.V8Field
 
@@ -19,7 +20,7 @@ class Person : V8Updatable {
         return arrayOf("phone")
     }
 
-    override fun onV8Update(key: String, value: Any) {
-        Log.d(TAG, "onV8Update(key=$key, value=$value)")
+    override fun onV8Update(v8obj: V8Object, key: String, newValue: Any?, oldValue: Any?) {
+        Log.d(TAG, "onV8Update(key=$key, value=$newValue)")
     }
 }
