@@ -25,9 +25,10 @@ class MainActivity : AppCompatActivity() {
                 J2V8Helper.help(v8)
 
                 val native = Native(v8)
-                v8.add("Native", V8Object(v8).apply {
-                    bindWith(native)
-                })
+                val nativeV8 = V8Object(v8);
+                nativeV8.bindWith(native)
+
+                v8.add("Native", nativeV8)
                 v8.executeScript(it)
             }
         }
